@@ -181,7 +181,7 @@ def _process_resources(ctx, java_package, manifest_ctx, localized_ctx, **unused_
         enable_res_v3 = _flags.get(ctx).android_enable_res_v3,
         # TODO(b/144163743): remove fix_resource_transitivity, which was only added to emulate
         # misbehavior on the Java side.
-        fix_resource_transitivity = bool(ctx.attr.srcs),
+        fix_resource_transitivity = True,
 
         # Tool and Processing related inputs
         aapt = get_android_toolchain(ctx).aapt2.files_to_run,
