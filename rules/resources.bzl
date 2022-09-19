@@ -1263,8 +1263,7 @@ def _process_starlark(
         manifest or
         resource_files or
         defined_assets or
-        defined_assets_dir or
-        exports_manifest,
+        defined_assets_dir,
     )
 
     # TODO(djwhang): Clean up the difference between neverlink the attribute used
