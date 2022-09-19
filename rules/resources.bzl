@@ -13,13 +13,13 @@
 # limitations under the License.
 """Bazel Android Resources."""
 
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
+load("@rules_java//java/common:java_common.bzl", "java_common")
+load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("//providers:providers.bzl", "AndroidLibraryResourceClassJarProvider", "ResourcesNodeInfo", "StarlarkAndroidResourcesInfo")
 load("//rules:acls.bzl", "acls")
 load("//rules:min_sdk_version.bzl", _min_sdk_version = "min_sdk_version")
 load("//rules:visibility.bzl", "PROJECT_VISIBILITY")
-load("@rules_java//java/common:java_common.bzl", "java_common")
-load("@rules_java//java/common:java_info.bzl", "JavaInfo")
-load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load(":attrs.bzl", _attrs = "attrs")
 load(":busybox.bzl", _busybox = "busybox")
 load(":path.bzl", _path = "path")
@@ -1186,7 +1186,7 @@ def _process_starlark(
         resource_files = None,
         neverlink = False,
         enable_data_binding = False,
-        fix_resource_transitivity = False,
+        fix_resource_transitivity = True,
         aapt = None,
         android_jar = None,
         android_kit = None,
@@ -1800,7 +1800,7 @@ def _process(
         enable_res_v3 = False,
         res_v3_dummy_manifest = None,
         res_v3_dummy_r_txt = None,
-        fix_resource_transitivity = False,
+        fix_resource_transitivity = True,
         zip_tool = None):
     out_ctx = _process_starlark(
         ctx,
