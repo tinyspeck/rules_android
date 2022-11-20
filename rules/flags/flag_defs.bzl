@@ -82,7 +82,6 @@ def define_flags():
         description = "",
     )
 
-
     flags.EXPOSE_native_bool(
         name = "stamp",
         description = "Accesses the native --stamp CLI flag",
@@ -98,4 +97,10 @@ def define_flags():
         name = "use_baseline_as_startup_profile",
         default = False,
         description = "For testing/validation only. Use baseline profiles as startup profiles in optimized builds.",
+    )
+
+    flags.DEFINE_bool(
+        name = "namespaced_r_class",
+        default = False,
+        description = "Enables namespaced R class generation",
     )
