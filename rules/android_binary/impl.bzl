@@ -1127,5 +1127,5 @@ def impl(ctx):
     Returns:
       A list of providers.
     """
-    java_package = java.resolve_package_from_label(ctx.label, ctx.attr.custom_package)
+    java_package = ctx.attr.custom_package if ctx.attr.custom_package else None
     return processing_pipeline.run(ctx, java_package, _PROCESSING_PIPELINE)
