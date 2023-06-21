@@ -55,7 +55,8 @@ def make_rule(
         implementation = impl,
         provides = _DEFAULT_PROVIDES,
         outputs = _outputs,
-        additional_toolchains = []):
+        additional_toolchains = [],
+        additional_providers = []):
     """Makes the rule.
 
     Args:
@@ -64,13 +65,15 @@ def make_rule(
       provides: A list. The providers that the rule must provide.
       outputs: A function. The rule's outputs method for declaring predeclared outputs.
       additional_toolchains: A list. Additional toolchains passed to pass to rule(toolchains).
+      additional_providers: A list. Additional providers passed to pass to rule(providers).
+
     Returns:
       A rule.
     """
     return rule(
         attrs = attrs,
         implementation = implementation,
-        provides = provides,
+        provides = provides + additional_providers,
         toolchains = [
             "//toolchains/android:toolchain_type",
             ANDROID_SDK_TOOLCHAIN_TYPE,
