@@ -1789,14 +1789,6 @@ def _process_starlark(
         AndroidLibraryResourceClassJarProvider(
             jars = depset(
                 (resources_ctx[_R_JAVA].runtime_output_jars if resources_ctx[_R_JAVA] else []),
-                transitive = [
-                    p.jars
-                    for p in utils.collect_providers(
-                        AndroidLibraryResourceClassJarProvider,
-                        deps,
-                        exports,
-                    )
-                ],
                 order = "preorder",
             ),
         ),
