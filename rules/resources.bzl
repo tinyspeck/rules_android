@@ -590,18 +590,6 @@ def _package(
 
     g3itr_manifest = manifest
 
-    if xsltproc or instrument_xslt:
-        g3itr_manifest = ctx.actions.declare_file(
-            "_migrated/" + ctx.label.name + "add_g3itr/AndroidManifest.xml",
-        )
-        _add_g3itr(
-            ctx,
-            out_manifest = g3itr_manifest,
-            manifest = manifest,
-            xsltproc = xsltproc,
-            instrument_xslt = instrument_xslt,
-        )
-
     direct_resources_nodes = []
     transitive_resources_nodes = []
     transitive_assets = []
@@ -1428,19 +1416,6 @@ def _process_starlark(
                 host_javabase = host_javabase,
             )
             manifest = stamped_manifest
-
-        if instrument_xslt:
-            g3itr_manifest = ctx.actions.declare_file(
-                ctx.label.name + "_g3itr_manifest/AndroidManifest.xml",
-            )
-            _add_g3itr(
-                ctx,
-                out_manifest = g3itr_manifest,
-                manifest = manifest,
-                xsltproc = xsltproc,
-                instrument_xslt = instrument_xslt,
-            )
-            manifest = g3itr_manifest
 
         parsed_assets = ctx.actions.declare_file(ctx.label.name + "_symbols/assets.bin")
         _busybox.parse(
