@@ -482,7 +482,6 @@ def android_application_macro(_android_binary, **attrs):
 
     # Create an android_binary base split, plus an android_application to produce the aab
     name = attrs.pop("name")
-    base_split_name = "%s_base" % name
 
     # bundle_config is deprecated in favor of bundle_config_file
     # In the future bundle_config will accept a build rule rather than a raw file.
@@ -496,14 +495,14 @@ def android_application_macro(_android_binary, **attrs):
         deps = deps + [str(module_targets.title_lib)]
 
     _android_binary(
-        name = base_split_name,
+        name = name,
         deps = deps,
         **attrs
     )
 
     android_application(
-        name = name,
-        base_module = ":%s" % base_split_name,
+        name = "%s_aab" % name,
+        base_module = ":%s" % name,
         bundle_config_file = bundle_config_file,
         app_integrity_config = app_integrity_config,
         device_group_config = device_group_config,
