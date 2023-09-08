@@ -80,6 +80,7 @@ def process_r8(ctx, validation_ctx, jvm_ctx, packaged_resources_ctx, build_info_
     android_jar = get_android_sdk(ctx).android_jar
     proguard_specs = proguard.get_proguard_specs(ctx, packaged_resources_ctx.resource_proguard_config)
     min_sdk_version = getattr(ctx.attr, "min_sdk_version", None)
+    proguard_mappings_file = ctx.actions.declare_file(ctx.label.name + "_proguard.map")
 
     neverlink_infos = utils.collect_providers(StarlarkAndroidNeverlinkInfo, ctx.attr.deps)
     neverlink_jars = depset(transitive = [info.transitive_neverlink_libraries for info in neverlink_infos])
@@ -88,6 +89,7 @@ def process_r8(ctx, validation_ctx, jvm_ctx, packaged_resources_ctx, build_info_
     args.add("--release")
     if min_sdk_version:
         args.add("--min-api", min_sdk_version)
+    args.add("--pg-map-output", proguard_mappings_file)
     args.add("--output", dexes_zip)
     args.add_all(proguard_specs, before_each = "--pg-conf")
     args.add("--lib", android_jar)
@@ -100,7 +102,7 @@ def process_r8(ctx, validation_ctx, jvm_ctx, packaged_resources_ctx, build_info_
         executable = get_android_toolchain(ctx).r8.files_to_run,
         arguments = [args],
         inputs = depset([android_jar, deploy_jar] + proguard_specs, transitive = [neverlink_jars]),
-        outputs = [dexes_zip],
+        outputs = [dexes_zip, proguard_mappings_file],
         mnemonic = "AndroidR8",
         jvm_flags = ["-Xmx8G"],
         progress_message = "R8 Optimizing, Desugaring, and Dexing %{label}",
@@ -119,6 +121,7 @@ def process_r8(ctx, validation_ctx, jvm_ctx, packaged_resources_ctx, build_info_
         value = struct(
             final_classes_dex_zip = dexes_zip,
             dex_info = android_dex_info,
+            proguard_mappings_file = proguard_mappings_file,
             providers = [
                 android_dex_info,
                 AndroidPreDexJarInfo(pre_dex_jar = deploy_jar),
