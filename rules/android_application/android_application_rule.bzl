@@ -147,7 +147,7 @@ def _process_feature_module(
         aapt = get_android_toolchain(ctx).aapt2.files_to_run,
         busybox = get_android_toolchain(ctx).android_resources_busybox.files_to_run,
         host_javabase = _common.get_host_javabase(ctx),
-        should_throw_on_conflict = True,
+        should_throw_on_conflict = False,
         application_id = application_id,
     )
 
