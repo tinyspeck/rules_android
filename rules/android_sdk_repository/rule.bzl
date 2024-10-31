@@ -19,6 +19,9 @@ load(
     "is_android_revision",
     "parse_android_revision",
 )
+load("@rules_android_ndk//:rules.bzl", "android_ndk_repository")
+
+_ANDROID_SDK_TOOLS = "10406996_latest"
 
 _SDK_REPO_TEMPLATE = Label(":template.bzl")
 _EMPTY_SDK_REPO_TEMPLATE = Label(":empty.template.bzl")
@@ -210,15 +213,87 @@ def _android_sdk_repository_extension_impl(module_ctx):
     else:
         module = module_ctx.modules[0]
 
+    # Configures both the hashed directory location, and cmdline_tools
+    # versions to use per platform
+    if module_ctx.os.name == "mac os x":
+        md5_bin = "/sbin/md5"
+        platform = "mac"
+    else:
+        md5_bin = "/usr/bin/md5sum"
+        platform = "linux"
+
+    cmdline_url = _cmdline_tools_url_for(platform)
+    module_ctx.download_and_extract(cmdline_url)
+
+    output_base_hash_result = module_ctx.execute(
+        ["bash", "-c", md5_bin, '-q -s "${PWD%/*/*/*/*}"'],
+    )
+    if output_base_hash_result.return_code != 0:
+        fail("Failed to calculate output base hash: {}".format(
+            output_base_hash_result.stderr,
+        ))
+
+    # Ensure that this repository is unique per output base
+    output_base_hash = output_base_hash_result.stdout.split(" ")[0].strip()
+
+    path = "/var/tmp/android_sdk/{}/sdk".format(output_base_hash)
+
+    license_file = module_ctx.file("android-sdk-license", content = """
+24333f8a63b6825ea9c5514f83c2829b004d1fee
+
+""")
+
+    result = module_ctx.execute(
+        ["mkdir", "-p", path + "/licenses"],
+    )
+    result = module_ctx.execute(
+        ["cp", "android-sdk-license", path + "/licenses/android-sdk-license"],
+    )
+
+    module_ctx.report_progress("Almost.... there")
+
+    # Download and install the Android SDK
+    args = [
+        "--sdk_root={path}".format(path = path),
+        "platform-tools",
+        "platforms;android-{api_level}".format(
+            api_level = module.tags.configure[0].api_level,
+        ),
+        "build-tools;{build_tools_version}".format(build_tools_version = module.tags.configure[0].build_tools_version),
+        "ndk;{ndk_version}".format(ndk_version = module.tags.configure[0].ndk_version),
+    ]
+
+    result = module_ctx.execute(["cmdline-tools/bin/sdkmanager"] + args, environment = {
+        "JAVA_HOME": module_ctx.getenv("SYSTEM_JAVA_HOME"),
+    })
+
+    if result.return_code != 0:
+        print("sdkmanager call failed!")
+        print(result.stderr)
+        print(result.stdout)
+
+    add_directory_repo(
+        name = "slack_androidsdk_install",
+        directory = path,
+    )
+
     kwargs = {}
     if module.tags.configure:
         kwargs["api_level"] = module.tags.configure[0].api_level
         kwargs["build_tools_version"] = module.tags.configure[0].build_tools_version
-        kwargs["path"] = module.tags.configure[0].path
+        kwargs["path"] = path
 
     _android_sdk_repository(
         name = "androidsdk",
         **kwargs
+    )
+
+    android_ndk_repository(
+        name = "androidndk",
+        path = "{sdk_path}/ndk/{ndk_version}".format(
+            sdk_path = path,
+            ndk_version = module.tags.configure[0].ndk_version
+        )
     )
 
 android_sdk_repository_extension = module_extension(
@@ -228,6 +303,30 @@ android_sdk_repository_extension = module_extension(
             "path": attr.string(),
             "api_level": attr.int(),
             "build_tools_version": attr.string(),
+            "ndk_version": attr.string(),
         }),
     },
 )
+
+### Auto android SDK imp
+
+def _cmdline_tools_url_for(platform):
+    if platform not in ["mac", "linux"]:
+        fail("Expected mac or linux as platform URL types")
+
+    return "https://dl.google.com/android/repository/commandlinetools-{platform}-{sdk_tools}.zip".format(platform = platform, sdk_tools = _ANDROID_SDK_TOOLS)
+
+def _add_directory_repo_impl(repository_ctx):
+    directory = repository_ctx.attr.directory
+
+    repository_ctx.symlink(directory, "sdk")
+
+    return directory
+
+add_directory_repo = repository_rule(
+    implementation = _add_directory_repo_impl,
+    attrs = {
+        "directory": attr.string(mandatory = True, doc = "Path to the directory to add"),
+    },
+)
+
