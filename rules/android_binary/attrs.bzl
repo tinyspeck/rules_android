@@ -201,11 +201,11 @@ ATTRS = _attrs.replace(
             # This is for only generating proguard outputs when proguard_specs is not empty or of type select.
             _generate_proguard_outputs = attr.bool(),
             _enable_manifest_merging = attr.bool(default = True),
-            _cc_toolchain_split = attr.label(
-                cfg = android_split_transition,
-                default = "@bazel_tools//tools/cpp:current_cc_toolchain",
-                aspects = [split_config_aspect],
-            ),
+            # _cc_toolchain_split = attr.label(
+            #     cfg = android_split_transition,
+            #     default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            #     aspects = [split_config_aspect],
+            # ),
             _optimizing_dexer = attr.label(
                 cfg = "exec",
                 allow_single_file = True,
