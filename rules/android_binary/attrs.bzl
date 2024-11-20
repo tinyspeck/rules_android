@@ -202,11 +202,11 @@ ATTRS = _attrs.replace(
             # For generating art profile outputs when generate_art_profile is true or a select.
             _generate_art_profile_outputs = attr.bool(),
             _enable_manifest_merging = attr.bool(default = True),
-            _cc_toolchain_split = attr.label(
-                cfg = android_split_transition,
-                default = "@rules_cc//cc:current_cc_toolchain",
-                aspects = [split_config_aspect],
-            ),
+            # _cc_toolchain_split = attr.label(
+            #     cfg = android_split_transition,
+            #     default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            #     aspects = [split_config_aspect],
+            # ),
             _optimizing_dexer = attr.label(
                 cfg = "exec",
                 allow_single_file = True,
