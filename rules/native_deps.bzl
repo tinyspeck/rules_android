@@ -96,50 +96,50 @@ def process(ctx, filename, merged_libraries_map = {}):
     native_libs_basename = None
     libs_name = None
     libs = dict()
-    for key, deps in ctx.split_attr.deps.items():
-        cc_toolchain_dep = ctx.split_attr._cc_toolchain_split[key]
-        cc_toolchain = cc_toolchain_dep[cc_common.CcToolchainInfo]
-        build_config = cc_toolchain_dep[SplitConfigInfo].build_config
-        libs_dir_name = _get_libs_dir_name(
-            cc_toolchain_dep[SplitConfigInfo].target_platform,
-        )
-        linker_input = cc_common.create_linker_input(
-            owner = ctx.label,
-            user_link_flags = ["-Wl,-soname=lib" + target_name],
-        )
-        cc_info = cc_common.merge_cc_infos(
-            cc_infos = _concat(
-                [CcInfo(linking_context = cc_common.create_linking_context(
-                    linker_inputs = depset([linker_input]),
-                ))],
-                _get_cc_link_params_infos(ctx, deps),
-                [dep[AndroidCcLinkParamsInfo].link_params for dep in deps if AndroidCcLinkParamsInfo in dep],
-                [dep[CcInfo] for dep in deps if CcInfo in dep],
-            ),
-        )
-        new_libraries = []
-        stub_libraries = []
-        if merged_libraries_map:
-            new_libraries.extend(merged_libraries_map[key].new_libraries)
-            stub_libraries.extend(merged_libraries_map[key].stub_libraries)
+    # for key, deps in ctx.split_attr.deps.items():
+    #     cc_toolchain_dep = ctx.split_attr._cc_toolchain_split[key]
+    #     cc_toolchain = cc_toolchain_dep[cc_common.CcToolchainInfo]
+    #     build_config = cc_toolchain_dep[SplitConfigInfo].build_config
+    #     libs_dir_name = _get_libs_dir_name(
+    #         cc_toolchain_dep[SplitConfigInfo].target_platform,
+    #     )
+    #     linker_input = cc_common.create_linker_input(
+    #         owner = ctx.label,
+    #         user_link_flags = ["-Wl,-soname=lib" + target_name],
+    #     )
+    #     cc_info = cc_common.merge_cc_infos(
+    #         cc_infos = _concat(
+    #             [CcInfo(linking_context = cc_common.create_linking_context(
+    #                 linker_inputs = depset([linker_input]),
+    #             ))],
+    #             _get_cc_link_params_infos(ctx, deps),
+    #             [dep[AndroidCcLinkParamsInfo].link_params for dep in deps if AndroidCcLinkParamsInfo in dep],
+    #             [dep[CcInfo] for dep in deps if CcInfo in dep],
+    #         ),
+    #     )
+    #     new_libraries = []
+    #     stub_libraries = []
+    #     if merged_libraries_map:
+    #         new_libraries.extend(merged_libraries_map[key].new_libraries)
+    #         stub_libraries.extend(merged_libraries_map[key].stub_libraries)
 
-        native_deps_lib = _link_native_deps_if_present(ctx, cc_info, cc_toolchain, build_config, target_name)
-        if native_deps_lib:
-            new_libraries.append(native_deps_lib)
-            native_libs_basename = native_deps_lib.basename
+    #     native_deps_lib = _link_native_deps_if_present(ctx, cc_info, cc_toolchain, build_config, target_name)
+    #     if native_deps_lib:
+    #         new_libraries.append(native_deps_lib)
+    #         native_libs_basename = native_deps_lib.basename
 
-        shared_libs = _collect_unique_shared_libs(
-            new_libraries,
-            stub_libraries,
-            cc_info,
-        )
+    #     shared_libs = _collect_unique_shared_libs(
+    #         new_libraries,
+    #         stub_libraries,
+    #         cc_info,
+    #     )
 
-        if shared_libs:
-            libs[libs_dir_name] = depset(shared_libs)
+    #     if shared_libs:
+    #         libs[libs_dir_name] = depset(shared_libs)
 
-    if libs and native_libs_basename:
-        libs_name = ctx.actions.declare_file("nativedeps_filename/" + target_name + "/" + filename)
-        ctx.actions.write(output = libs_name, content = native_libs_basename)
+    # if libs and native_libs_basename:
+    #     libs_name = ctx.actions.declare_file("nativedeps_filename/" + target_name + "/" + filename)
+    #     ctx.actions.write(output = libs_name, content = native_libs_basename)
 
     transitive_native_libs = _get_transitive_native_libs(ctx)
     return AndroidBinaryNativeLibsInfo(
