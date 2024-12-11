@@ -125,7 +125,6 @@ def _outputs(name, _package_name, _defined_local_resources):
     if _defined_local_resources:
         outputs.update(
             dict(
-                resources_src_jar = "%{name}.srcjar",
                 resources_txt = "%{name}_symbols/R.txt",
                 resources_jar = "%{name}_resources.jar",
             ),
