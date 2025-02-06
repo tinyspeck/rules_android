@@ -123,7 +123,7 @@ maven.install(
     ],
     # To generate, run:
     # REPIN=1 bazelisk run --enable_bzlmod @rules_android_maven//:pin
-    # lock_file = "//:rules_android_maven_install.json",
+    lock_file = "//:rules_android_maven_install.json",
     use_starlark_android_rules = True,
 )
 use_repo(
@@ -165,5 +165,11 @@ use_repo(apksig_extension, "apksig")
 
 android_sdk_repository_extension = use_extension("//rules/android_sdk_repository:rule.bzl", "android_sdk_repository_extension")
 use_repo(android_sdk_repository_extension, "androidsdk")
+
+android_sdk_repository_extension.configure(
+    api_level = 35,
+    build_tools_version = "35.0.0",
+    license_hash = "24333f8a63b6825ea9c5514f83c2829b004d1fee",
+)
 
 register_toolchains("@androidsdk//:sdk-toolchain", "@androidsdk//:all")
