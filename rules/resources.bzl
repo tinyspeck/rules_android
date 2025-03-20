@@ -621,7 +621,12 @@ def _package(
         for pkg, r_txts in dep.packages_to_r_txts.items():
             packages_to_r_txts_depset.setdefault(pkg, []).append(r_txts)
         transitive_resource_apks.append(dep.transitive_resource_apks)
-    if manifest_merge_order == "legacy":
+    
+    if instruments:
+        # Instrumentation apks should not merge exported
+        # manifests from dependencies.
+        mergee_manifests = depset()
+    elif manifest_merge_order == "legacy":
         mergee_manifests = depset([
             node_info.manifest
             for node_info in depset(transitive = transitive_resources_nodes + direct_resources_nodes).to_list()
