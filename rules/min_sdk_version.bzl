@@ -24,8 +24,8 @@ load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 visibility(PROJECT_VISIBILITY)
 
 _SETTING = "//rules/flags:min_sdk_version"
-_DEPOT_FLOOR = 23
-_MIN_SDK_LEVELS = sorted([_DEPOT_FLOOR, 24])
+_DEPOT_FLOOR = 29
+_MIN_SDK_LEVELS = sorted([_DEPOT_FLOOR, 29])
 
 _ATTRS = dict(
     _min_sdk_version = attr.label(
@@ -53,7 +53,9 @@ def _get(ctx):
     # Android Platforms Transition and Feature Flags transition is swapped.
     # if not ctx.attr._min_sdk_version[BuildSettingInfo].value:
     #     return _DEPOT_FLOOR
+
     # return ctx.attr._min_sdk_version[BuildSettingInfo].value
+
     return _DEPOT_FLOOR
 
 min_sdk_version = struct(
