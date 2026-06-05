@@ -22,6 +22,7 @@ load("@rules_java//java/common:java_info.bzl", "JavaInfo")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load(":attrs.bzl", _attrs = "attrs")
 load(":busybox.bzl", _busybox = "busybox")
+load(":java.bzl", _java = "java")
 load(":path.bzl", _path = "path")
 load(":proguard.bzl", _proguard = "proguard")
 load(":utils.bzl", "ANDROID_TOOLCHAIN_TYPE", "get_android_toolchain", "utils", _compilation_mode = "compilation_mode", _log = "log")
@@ -1544,6 +1545,19 @@ def _process(
                 compile_jar = out_class_jar,
             )
             processed_manifest = manifest
+
+            # The single-pass namespaced compile emits the R class directly into
+            # out_class_jar and produces no R *source* jar. The android_library
+            # rule nonetheless predeclares <name>.srcjar (resources_src_jar), so
+            # emit an empty srcjar to give that output a generating action.
+            _java.singlejar(
+                ctx,
+                inputs = [],
+                output = ctx.actions.declare_file(ctx.label.name + ".srcjar"),
+                mnemonic = "EmptyNamespacedRSrcJar",
+                progress_message = "Generating empty R srcjar for %s" % ctx.label,
+                java_toolchain = java_toolchain,
+            )
 
         # TODO(b/160907203): Remove this fix once the native resource processing pipeline is turned off.
         if enable_data_binding:
