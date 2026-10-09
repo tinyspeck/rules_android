@@ -24,8 +24,12 @@ load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 visibility(PROJECT_VISIBILITY)
 
 _SETTING = "//rules/flags:min_sdk_version"
-_DEPOT_FLOOR = 24
-_DEX_DESUGAR = 23  # Kept at 23 due to b/331852939. See some related discussion at b/319114605
+# Slack: every binary in slack-android-ng has minSdkVersion 29 and Gradle dexes/desugars at that
+# level. Dexing lower (23/24) made D8 desugar Kotlin interface static methods into companions that
+# dexmerge lost (NoSuchMethodError in Compose layout paths at runtime), and backports API 24-28
+# features Gradle never does. Keep both at the real minSdk so the dex matches Gradle's.
+_DEPOT_FLOOR = 29
+_DEX_DESUGAR = 29
 # _MIN_SDK_LEVELS = sorted([_DEPOT_FLOOR, 24])
 
 _ATTRS = dict(
